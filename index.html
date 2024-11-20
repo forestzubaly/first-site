@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZUBALY</title>
 
-    <!-- Cache prevention meta tags -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"></script>
@@ -72,19 +67,27 @@
         // Save the item to Firestore
         async function saveItem(text) {
             const now = new Date().getTime();
-            await db.collection("messages").add({ text, timestamp: now });
+            try {
+                await db.collection("messages").add({ text, timestamp: now });
+            } catch (error) {
+                console.error("Error saving to Firestore:", error);
+            }
         }
 
         // Load and display saved items
         async function loadItems() {
             const now = new Date().getTime();
-            const querySnapshot = await db.collection("messages").get();
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                if (now - data.timestamp < 24 * 60 * 60 * 1000) { // 24-hour filter
-                    displayItem(data.text);
-                }
-            });
+            try {
+                const querySnapshot = await db.collection("messages").get();
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (now - data.timestamp < 24 * 60 * 60 * 1000) { // 24-hour filter
+                        displayItem(data.text);
+                    }
+                });
+            } catch (error) {
+                console.error("Error loading from Firestore:", error);
+            }
         }
 
         // Display an item at a random position
@@ -103,9 +106,9 @@
             if (event.key === 'Enter') {
                 const text = this.value.trim();
                 if (text) {
-                    await saveItem(text);
-                    displayItem(text);
-                    this.value = ''; // Clear the input
+                    await saveItem(text); // Save to Firestore
+                    displayItem(text);   // Display on the page
+                    this.value = '';     // Clear the input field
                 }
             }
         });
