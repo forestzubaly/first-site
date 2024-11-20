@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZUBALY</title>
+    
+    <!-- Meta tags to prevent caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Inline styling (optional: move to style.css if needed) -->
     <style>
         body {
             margin: 0;
@@ -31,12 +38,20 @@
             word-wrap: break-word;
         }
     </style>
+
+    <!-- Link to external styles (add versioning to prevent cache issues) -->
+    <link rel="stylesheet" href="style.css?v=1.0">
 </head>
 <body>
     <input type="text" id="textInput" placeholder="Type something and press Enter..." />
     <div class="output" id="outputArea"></div>
 
+    <!-- JavaScript (versioning added) -->
+    <script src="script.js?v=1.0"></script>
+    
+    <!-- Inline JavaScript -->
     <script>
+        // JavaScript logic for handling input and output
         const textInput = document.getElementById('textInput');
         const outputArea = document.getElementById('outputArea');
 
