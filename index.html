@@ -10,6 +10,10 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"></script>
+
     <style>
         body {
             margin: 0;
@@ -43,6 +47,21 @@
     <input type="text" id="textInput" placeholder="Speak your mind pimp..." />
 
     <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlFaSoE_ODMQYMBI7mmV0E9F8AZe9Du60",
+            authDomain: "zubaly-site.firebaseapp.com",
+            projectId: "zubaly-site",
+            storageBucket: "zubaly-site.appspot.com",
+            messagingSenderId: "907391612",
+            appId: "1:907391612:web:9bb9416e8ef9b19eec0ff9",
+            measurementId: "G-K4N16QGZRF"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         // Helper to generate random positions
         function getRandomPosition() {
             const x = Math.random() * window.innerWidth * 0.9; // 90% width
@@ -50,23 +69,21 @@
             return { x, y };
         }
 
-        // Save the item to localStorage with timestamp
-        function saveItem(text) {
+        // Save the item to Firestore
+        async function saveItem(text) {
             const now = new Date().getTime();
-            const items = JSON.parse(localStorage.getItem('savedItems')) || [];
-            items.push({ text, timestamp: now });
-            localStorage.setItem('savedItems', JSON.stringify(items));
+            await db.collection("messages").add({ text, timestamp: now });
         }
 
         // Load and display saved items
-        function loadItems() {
-            const items = JSON.parse(localStorage.getItem('savedItems')) || [];
+        async function loadItems() {
             const now = new Date().getTime();
-            const validItems = items.filter(item => now - item.timestamp < 24 * 60 * 60 * 1000); // 24-hour filter
-            localStorage.setItem('savedItems', JSON.stringify(validItems)); // Remove expired items
-
-            validItems.forEach(item => {
-                displayItem(item.text);
+            const querySnapshot = await db.collection("messages").get();
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                if (now - data.timestamp < 24 * 60 * 60 * 1000) { // 24-hour filter
+                    displayItem(data.text);
+                }
             });
         }
 
@@ -82,11 +99,11 @@
         }
 
         // Handle Enter key press
-        document.getElementById('textInput').addEventListener('keypress', function(event) {
+        document.getElementById('textInput').addEventListener('keypress', async function(event) {
             if (event.key === 'Enter') {
                 const text = this.value.trim();
                 if (text) {
-                    saveItem(text);
+                    await saveItem(text);
                     displayItem(text);
                     this.value = ''; // Clear the input
                 }
